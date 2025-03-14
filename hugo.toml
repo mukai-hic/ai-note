@@ -6,7 +6,8 @@ title = "AI-note"
 
 [params]
   description = "AI-note"
-  
+  favicon = "favicon.ico"
+
 [menu]
   [[menu.main]]
     name = "ホーム"
