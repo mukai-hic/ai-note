@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プログラミングの終わり - グラフィックレコーディング</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol&family=Yomogi&family=Zen+Kurenaido&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+        :root {
+            --color-1: #A61B40;
+            --color-2: #DCE0F2;
+            --color-3: #012840;
+            --color-4: #A66A5D;
+            --color-5: #0D0D0D;
+            --color-accent: #F2BC57;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        body {
+            /* 手書き風グリッドライン背景 */
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h100v100H0z" fill="none"/><path d="M0 10h100M10 0v100" stroke="%23e0e0e0" stroke-width="0.5" stroke-dasharray="2,3"/></svg>');
+            background-size: 30px 30px;
+            background-color: #f9f7f1;
+            overflow-x: hidden;
+            font-family: 'Zen Kurenaido', sans-serif;
+            color: var(--color-5);
+            line-height: 1.4;
+        }
+
+        h1 {
+            font-family: 'Kaisei Decol', serif;
+            font-size: 42px;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--color-1), var(--color-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            padding: 10px 0;
+        }
+
+        h1 i {
+            font-size: 32px;
+            position: absolute;
+            animation: bounce 2s infinite;
+        }
+
+        h1 i.left {
+            left: 20%;
+            animation-delay: 0.3s;
+        }
+
+        h1 i.right {
+            right: 20%;
+            animation-delay: 0.5s;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #475569;
+            margin-bottom: 60px;
+            font-family: 'Yomogi', cursive;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 30px;
+        }
+
+        .card {
+            background-color: transparent;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+            margin-bottom: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: var(--color-3);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Kaisei Decol', serif;
+        }
+
+        .card h2 i {
+            color: var(--color-1);
+            animation: pulse 2s infinite;
+        }
+
+        .icon-large {
+            font-size: 70px;
+            display: block;
+            margin: 15px auto;
+            text-align: center;
+            color: var(--color-1);
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background-color: rgba(242, 187, 87, 0.1);
+            border-radius: 15px;
+            padding: 12px;
+            margin: 20px 0;
+        }
+
+        .speech-bubble:before {
+            content: "";
+            position: absolute;
+            left: 15px;
+            top: -10px;
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: transparent transparent rgba(242, 187, 87, 0.1) transparent;
+        }
+
+        .comparison-item {
+            background-color: transparent;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-family: 'Yomogi', cursive;
+        }
+
+        .highlight-box {
+            border-left: 3px solid var(--color-accent);
+            padding-left: 10px;
+            background-color: transparent;
+            margin: 15px 0;
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: var(--color-1);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 12px;
+            color: #475569;
+            padding: 20px;
+            border-top: 1px dashed #ccc;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* メディアクエリ */
+        @media (max-width: 1600px) {
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            h1 i.left { left: 10%; }
+            h1 i.right { right: 10%; }
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            h1 { font-size: 32px; }
+            h1 i { font-size: 24px; }
+            h1 i.left { left: 5%; }
+            h1 i.right { right: 5%; }
+        }
+
+        @media (max-width: 480px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 28px; }
+            h1 i.left, h1 i.right { position: static; display: block; margin: 10px auto; }
+        }
+
+        .quote {
+            font-style: italic;
+            color: var(--color-4);
+            font-size: 16px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .quote:before {
+            content: """;
+            font-size: 40px;
+            position: absolute;
+            left: -5px;
+            top: -5px;
+            color: rgba(166, 106, 92, 0.2);
+        }
+
+        .emoji {
+            font-style: normal;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <i class="fas fa-code left"></i>
+            プログラミングの終わり... 知っているプログラミングの
+            <i class="fas fa-cogs right"></i>
+        </h1>
+        <div class="subtitle">
+            <i class="fas fa-user-edit"></i> Tim O'Reilly（2025年3月） | 
+            「AIによってソフトウェア開発者はすぐに仕事を失うというメディアの話題」を検証する
+        </div>
+
+        <div class="grid-container">
+            <!-- Card 1: Introduction -->
+            <div class="card">
+                <h2><i class="fas fa-exclamation-circle"></i> プログラミングの終わりではない</h2>
+                <i class="fas fa-history icon-large"></i>
+                <p>メディアではAIによって開発者が仕事を失うという話が多いが、実際は<span class="keyword">「今知っているプログラミング」の終わり</span>である。これは新しいことではない。</p>
+                <div class="speech-bubble">
+                    プログラミングの歴史は常に変化し続けている。一度も終わりはなく、常に再発明されてきた。
+                </div>
+            </div>
+
+            <!-- Card 2: History of Programming 1 -->
+            <div class="card">
+                <h2><i class="fas fa-route"></i> プログラミングの進化：初期</h2>
+                <i class="fas fa-microchip icon-large"></i>
+                <p>最初のプログラマーは物理的な回路を接続して計算を行なっていた。</p>
+                <div class="comparison-item">
+                    <i class="fas fa-calculator"></i> バイナリコード: スイッチをフリップして1ビットずつ入力
+                </div>
+                <div class="comparison-item">
+                    <i class="fas fa-language"></i> アセンブリ言語: 人間に近い言語でコンピュータに指示
+                </div>
+                <div class="comparison-item">
+                    <i class="fas fa-file-code"></i> 高水準コンパイル言語: Fortran、COBOL、C、C++、Java
+                </div>
+            </div>
+
+            <!-- Card 3: History of Programming 2 -->
+            <div class="card">
+                <h2><i class="fas fa-code-branch"></i> 新しい抽象化の波</h2>
+                <i class="fas fa-laptop-code icon-large"></i>
+                <p>デバッグが容易なインタープリタ言語が標準になった。BASICは最初「おもちゃ」と見られていたが、すぐに未来の波となった。</p>
+                <div class="highlight-box">
+                    プログラミングは子供や garage entrepreneurs にもアクセス可能になり、大企業や政府機関のバックオフィスの神官だけのものではなくなった <span class="emoji">🚀</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Operating Systems -->
+            <div class="card">
+                <h2><i class="fas fa-desktop"></i> OSの役割</h2>
+                <i class="fab fa-windows icon-large"></i>
+                <p>初期のPCでは、メーカーごとに低レベルドライバを書く必要があった。Windowsはそれを終わらせた。</p>
+                <div class="speech-bubble">
+                    Windowsは「ただのドライバーの集まり」と呼ばれていたが、Win32 APIsを前面に出すことで、プログラマーは低レベルコードを書く必要がなくなった
+                </div>
+                <p>Windows、macOS、iOS、Android により、今日のプログラマーの多くは以前の世代のプログラマーが知っていたことをあまり知る必要がなくなった <span class="emoji">💻</span></p>
+            </div>
+
+            <!-- Card 5: More Programmers -->
+            <div class="card">
+                <h2><i class="fas fa-users"></i> プログラマーの増加</h2>
+                <i class="fas fa-chart-line icon-large"></i>
+                <p>これはプログラミングの終わりではなく、かつてないほど多くのプログラマーがいた。何億ものユーザーが彼らの創造性の成果を消費した。</p>
+                <div class="highlight-box">
+                    需要の弾力性の古典的な実証: ソフトウェアの作成が容易になるにつれ、その価格は下がり、より多くの人々が支払いをするソリューションの創造が可能になった <span class="emoji">📈</span>
+                </div>
+            </div>
+
+            <!-- Card 6: Web Revolution -->
+            <div class="card">
+                <h2><i class="fas fa-globe"></i> ウェブ革命</h2>
+                <i class="fas fa-sitemap icon-large"></i>
+                <p>ウェブは別の「プログラミングの終わり」だった。UIはブラウザで表示される人間が読める文書になった。</p>
+                <div class="comparison-item">
+                    <i class="fas fa-file-alt"></i> 誰でも最小限のプログラミングスキルで「アプリケーション」を構築可能に
+                </div>
+                <div class="comparison-item">
+                    <i class="fas fa-code"></i> WordPressのようなツールで非プログラマーがウェブサイトを作れるように
+                </div>
+                <div class="comparison-item">
+                    <i class="fas fa-mobile-alt"></i> モバイルデバイスが新しい普及したフロントエンドを追加
+                </div>
+            </div>
+
+            <!-- Card 7: Cloud Computing -->
+            <div class="card">
+                <h2><i class="fas fa-cloud"></i> クラウドコンピューティング</h2>
+                <i class="fas fa-server icon-large"></i>
+                <p>ビッグデータ、Webサービス、クラウドコンピューティングは「インターネットOS」を確立した。</p>
+                <div class="speech-bubble">
+                    Apple Pay、Google Pay、Stripeのようなサービスは、最小限のプログラミング専門知識で支払いの受け取りなどの複雑な企業タスクを可能にした
+                </div>
+                <p>シンプルなAPIを通じて深く強力な機能が利用可能になった <span class="emoji">🔌</span></p>
+            </div>
+
+            <!-- Card 8: Programs as Managers -->
+            <div class="card">
+                <h2><i class="fas fa-robot"></i> プログラムがマネージャーに</h2>
+                <i class="fas fa-brain icon-large"></i>
+                <p>GoogleやFacebookなどのサービスの多くの作業は大規模に自動化されていた。</p>
+                <div class="quote">
+                    プログラムは実際の労働者であり、人間のプログラマーはそのマネージャーである
+                </div>
+                <p>数十万のプログラマーがこの種の監視作業を行っている。彼らはすでにデジタル同僚を作成し管理する世界に住んでいる <span class="emoji">🤖</span></p>
+            </div>
+
+            <!-- Card 9: Skills Evolution -->
+            <div class="card">
+                <h2><i class="fas fa-sync-alt"></i> スキルの進化</h2>
+                <i class="fas fa-graduation-cap icon-large"></i>
+                <p>各波で古いスキルは時代遅れになり、新しいスキルが成功の鍵になった。</p>
+                <div class="comparison-item">
+                    <i class="fas fa-cogs"></i> コンパイラを書くプログラマーはわずか
+                </div>
+                <div class="comparison-item">
+                    <i class="fab fa-js"></i> JavaScriptフレームワークやPythonライブラリを書く人は数千人
+                </div>
+                <div class="comparison-item">
+                    <i class="fas fa-globe"></i> Webとモバイルアプリケーションとバックエンドソフトウェアを書く人は数千万人
+                </div>
+                <p>何十億ものユーザーが彼らの成果を消費している <span class="emoji">🌍</span></p>
+            </div>
+
+            <!-- Card 10: AI Programming -->
+            <div class="card">
+                <h2><i class="fas fa-magic"></i> AIとプログラミング</h2>
+                <i class="fas fa-comment-dots icon-large"></i>
+                <p>今は非プログラマーが英語（または選択した言語）でLLMに話しかけ、有用なPythonプロトタイプを取得できる。</p>
+                <div class="highlight-box">
+                    新しいバズワード: CHOP（チャット指向プログラミング） <span class="emoji">💬</span>
+                </div>
+                <p>高度な推論モデルの台頭は、タスクを説明する高レベルのプロンプトで複雑なプログラムを生成できるAIを実証し始めている</p>
+            </div>
+
+            <!-- Card 11: Job Transformation -->
+            <div class="card">
+                <h2><i class="fas fa-exchange-alt"></i> 仕事の変革</h2>
+                <i class="fas fa-user-cog icon-large"></i>
+                <p>AIはプログラマーに取って代わるのではなく、仕事を変革する。</p>
+                <div class="quote">
+                    プログラマーで取り替えられるのはジュニアやミッドレベルではなく、新しいプログラミングツールやパラダイムを受け入れずに過去にしがみつく人たち
+                </div>
+                <p>新しいスキルを身につけたり発明したりする人は大きな需要がある。AIツールをマスターしたジュニア開発者は、マスターしていないシニアプログラマーよりも優れたパフォーマンスを発揮できる <span class="emoji">🔄</span></p>
+            </div>
+
+            <!-- Card 12: Historical Perspective -->
+            <div class="card">
+                <h2><i class="fas fa-book-open"></i> 歴史的視点</h2>
+                <i class="fas fa-industry icon-large"></i>
+                <p>経済史家James Bessenは、最初の産業革命がマサチューセッツ州ローウェルの繊維工場でどのように展開されたかを研究した。</p>
+                <div class="speech-bubble">
+                    工場労働者と職人は異なる種類のスキルを持っていたが、どちらも熟練労働者だった。新しい技術をどのように最も効果的に使用するかの知識が広く普及するまでには数十年かかった。
+                </div>
+                <p>Bessenはこれを「learning by doing（実践による学習）」と呼ぶ <span class="emoji">📚</span></p>
+            </div>
+
+            <!-- Card 13: New AI Stack -->
+            <div class="card">
+                <h2><i class="fas fa-layer-group"></i> 新しいAIスタック</h2>
+                <i class="fas fa-cubes icon-large"></i>
+                <p>Microsoftの副CTOであるSam Schillaceは「私たちはAIシステムを中心に新しいプログラミングパラダイムを発明している最中だ」と語る。</p>
+                <div class="highlight-box">
+                    デスクトップからインターネット時代に移行したとき、スタックのすべてのレベルは同じでもスタック全体が変化した。言語はコンパイル型から解釈型へ。チームはウォーターフォールからアジャイルへ。データベースはACIDからNoSQLへ。今、AIでも同じことが起きている <span class="emoji">🔄</span>
+                </div>
+            </div>
+
+            <!-- Card 14: AI Agent Challenges -->
+            <div class="card">
+                <h2><i class="fas fa-puzzle-piece"></i> AIエージェントの課題</h2>
+                <i class="fas fa-project-diagram icon-large"></i>
+                <p>Sierraの元Salesforce共同CEOであるBret Taylorは、会社のAIエージェントがそのデジタルインターフェースとして重要になると考えている。</p>
+                <div class="speech-bubble">
+                    「クールなプラットフォームとビジネスプロセスを取り、エージェントを実現する最後の1マイルは実際にかなり難しい」- Bret Taylor
+                </div>
+                <p>「エージェントエンジニア」という新しい役割が登場しつつある - フロントエンドWeb開発者に似たソフトウェア開発者 <span class="emoji">👨‍💻</span></p>
+            </div>
+
+            <!-- Card 15: The 70% Problem -->
+            <div class="card">
+                <h2><i class="fas fa-percent"></i> 70%問題</h2>
+                <i class="fas fa-bug icon-large"></i>
+                <p>Google ChromeのUX責任者であるAddy Osmaniは「70%問題」と呼ぶ: AIでエンジニアの生産性は劇的に向上するが、実際に使用するソフトウェアは目立って良くなっていないように見える。</p>
+                <div class="speech-bubble">
+                    非プログラマーがAIコード生成ツールで素晴らしいデモを出したり単純な問題を解決したりできるが、複雑なプログラムの最後の30%で行き詰まる。コードをデバッグしAIを正しい解決策に導くのに十分な知識がないから。
+                </div>
+            </div>
+
+            <!-- Card 16: Senior vs Junior Engineers -->
+            <div class="card">
+                <h2><i class="fas fa-balance-scale"></i> シニアvsジュニアエンジニア</h2>
+                <i class="fas fa-user-graduate icon-large"></i>
+                <div class="speech-bubble">
+                    CursorやCopilotなどのAIツールを使用するシニアエンジニアを見ると、魔法のように見える。特徴全体を数分でスキャフォールドでき、テストやドキュメントも含まれる。
+                </div>
+                <p>しかし注意深く観察すると、彼らはAIの提案をそのまま受け入れているわけではない。長年にわたって獲得したエンジニアリングの知恵を適用してAIの出力を形作り、制約している。AIは実装を加速するが、彼らの専門知識がコードをメンテナンス可能に保っている <span class="emoji">🧠</span></p>
+            </div>
+
+            <!-- Card 17: AI Reveals Thinking -->
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> AIが明らかにするもの</h2>
+                <i class="fas fa-keyboard icon-large"></i>
+                <p>Chip Huyenの観察:</p>
+                <div class="quote">
+                    AIは新しい種類の思考を導入するのではなく、実際に思考を必要とするものを明らかにする
+                </div>
+                <p>書くという物理的行為が自動化できるようになると、「プログラミング」の意味は実行可能なプログラムにアイデアを配置する行為を指すように変わる <span class="emoji">💡</span></p>
+                <div class="highlight-box">
+                    「コンピュータサイエンスはコードを書くことではなく、体系的な思考についてである」- Mehran Sahami（スタンフォードCS学部長）
+                </div>
+            </div>
+
+            <!-- Card 18: Agent Infrastructure -->
+            <div class="card">
+                <h2><i class="fas fa-network-wired"></i> エージェントインフラ</h2>
+                <i class="fas fa-traffic-light icon-large"></i>
+                <p>エージェント間の協力のための標準はまだ構築されていない。</p>
+                <div class="highlight-box">
+                    現在のツールは、エージェントが既存の機関（法的・経済的システムなど）や行為者（デジタルサービスプロバイダー、人間、他のAIエージェント）とどのように相互作用するかを形作るようには設計されていない
+                </div>
+                <p>エージェントインフラストラクチャの概念: 環境との相互作用と影響を仲介し影響するように設計されたエージェント外部の技術システムと共有プロトコル <span class="emoji">🔄</span></p>
+            </div>
+
+            <!-- Card 19: Future of Programming -->
+            <div class="card">
+                <h2><i class="fas fa-rocket"></i> プログラミングの未来</h2>
+                <i class="fas fa-glasses icon-large"></i>
+                <p>未来を発明する初期段階にいる。新しく学び、行うべきことがたくさんある。</p>
+                <div class="speech-bubble">
+                    AIが開発者を10倍生産的にすると想定しても、ビジネス、科学、インフラの「プログラム可能な表面積」が並行して増加すれば、それでも新しい10倍のプログラマーがもっと必要になる！
+                </div>
+                <p>ユーザーの期待も高まる。生産性向上を単にコスト削減に使う企業は、新機能を活用してより良いサービスを構築する企業に負ける <span class="emoji">🚀</span></p>
+            </div>
+
+            <!-- Card 20: Ambition -->
+            <div class="card">
+                <h2><i class="fas fa-mountain"></i> 野心的になる</h2>
+                <i class="fas fa-chart-bar icon-large"></i>
+                <p>長年のソフトウェア開発者であるSimon Willisonは、AIがプロジェクトでより「野心的」になることを可能にすると指摘する。</p>
+                <div class="highlight-box">
+                    別の分野から教訓を学ぶ: 最初のピクサー映画全体をレンダリングするのと同じくらいの時間が今日のマーベルスーパーヒーロー映画の1フレームをレンダリングするのにかかる可能性がある
+                </div>
+                <p>技術の進歩は、より安く/より速い配信だけでなく、より高品質につながる <span class="emoji">🎬</span></p>
+            </div>
+
+            <!-- Card 21: Prototype to Production -->
+            <div class="card">
+                <h2><i class="fas fa-cog"></i> プロトタイプから本番へ</h2>
+                <i class="fas fa-tools icon-large"></i>
+                <p>PalantirのCTOであるShyam Sankarは「プロトタイプから本番への旅」について語っている。</p>
+                <div class="quote">
+                    「企業へのAIの価値は自動化、企業の自律性にある。しかし自動化はエッジケースによって制限される」
+                </div>
+                <p>Sankarが予想する世界では、AIは「実際に開発者をビジネスにより移行させ、提供する影響においてより大きな影響力を持つよう解放することになる」 <span class="emoji">⚙️</span></p>
+            </div>
+
+            <!-- Card 22: Conclusion -->
+            <div class="card">
+                <h2><i class="fas fa-flag-checkered"></i> 結論</h2>
+                <i class="fas fa-door-open icon-large"></i>
+                <p>これはプログラミングの終わりではない。それは最新の再発明の始まりである。</p>
+                <div class="speech-bubble">
+                    プログラマーではなく、あらゆる職種で - AIを支援するプログラマーにならない人々が仕事を失うことになる
+                </div>
+                <p>今後数十年間、人間のプログラマーとAIの共同作業によって構築される新しいソフトウェアの世界全体がある <span class="emoji">🌅</span></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            グラフィックレコーディング作成日: 2025年3月10日 | 情報源: O'Reilly Radar「The End of Programming as We Know It」by Tim O'Reilly
+        </div>
+    

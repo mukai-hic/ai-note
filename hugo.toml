@@ -1,0 +1,18 @@
+theme = "ananke"
+
+baseURL = "https://example.org/"
+languageCode = "ja-jp"
+title = "AI-note"
+
+[params]
+  description = "AI-note"
+  
+[menu]
+  [[menu.main]]
+    name = "ホーム"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    name = "記事一覧"
+    url = "/posts/"
+    weight = 2

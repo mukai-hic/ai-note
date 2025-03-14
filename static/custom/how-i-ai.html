@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>グラフィックレコーディング: How I Use AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol&family=Yomogi&family=Zen+Kurenaido&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        body {
+            /* 手書き風グリッドライン背景 */
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h100v100H0z" fill="none"/><path d="M0 10h100M10 0v100" stroke="%23e0e0e0" stroke-width="0.5" stroke-dasharray="2,3"/></svg>');
+            background-size: 30px 30px;
+            background-color: #f9f7f1;
+            overflow-x: hidden;
+            font-family: 'Zen Kurenaido', sans-serif;
+            color: #334155;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 30px;
+        }
+
+        .card {
+            background-color: transparent;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+            margin-bottom: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .icon-large {
+            font-size: 70px;
+            display: block;
+            margin: 15px auto;
+            text-align: center;
+            color: #A61B40;
+        }
+
+        .main-title {
+            font-family: 'Kaisei Decol', serif;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0;
+            background: linear-gradient(45deg, #A61B40, #012840);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .main-title i {
+            font-size: 28px;
+            margin: 0 15px;
+            vertical-align: middle;
+            color: #A61B40;
+        }
+
+        .subtitle {
+            font-family: 'Yomogi', cursive;
+            font-size: 16px;
+            color: #475569;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .subtitle i {
+            margin-right: 5px;
+            color: #A66A5D;
+        }
+
+        .section-title {
+            font-family: 'Kaisei Decol', serif;
+            font-size: 18px;
+            color: #1e40af;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: #A61B40;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .text-content {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: #A61B40;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .keyword i, .keyword span {
+            font-size: 12px;
+            margin-left: 5px;
+            color: #A66A5D;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background-color: rgba(220, 223, 242, 0.3);
+            border-radius: 15px;
+            padding: 12px;
+            margin: 20px 0;
+            font-family: 'Yomogi', cursive;
+        }
+
+        .speech-bubble:before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            bottom: -15px;
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: rgba(220, 223, 242, 0.3) transparent;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .comparison-item {
+            background-color: transparent;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .highlight-box {
+            border-left: 3px solid #A61B40;
+            padding-left: 10px;
+            background-color: transparent;
+            margin: 15px 0;
+        }
+
+        .emoji-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .emoji-list li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .emoji-list li span {
+            font-size: 16px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        /* メディアクエリ */
+        @media (max-width: 1600px) {
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="main-title">
+            <i class="fa-solid fa-robot"></i>
+            How I Use AI: Meet My Promptly Hired Model Intern
+            <i class="fa-solid fa-brain"></i>
+        </h1>
+        <p class="subtitle">
+            <i class="fa-regular fa-calendar"></i> 2025年1月30日に書かれた「テクニカルユーザー」としてのAI活用法
+        </p>
+
+        <div class="grid-container">
+            <!-- カード1: はじめに -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-hand-point-right"></i>はじめに</h2>
+                <i class="fa-solid fa-comment-dots icon-large"></i>
+                <p class="text-content">
+                    筆者はTwitter（現X）からBlueskyに移行しようとしたが、Blueskyでは<span class="keyword">AI関連コンテンツに対して敵対的な雰囲気<i class="fa-solid fa-thumbs-down"></i></span>を感じた。この記事では、筆者が大規模言語モデル（LLM）をどのように活用しているかを共有する。
+                </p>
+                <div class="speech-bubble">
+                    記事を読むと、私のAI活用法は知的財産権への影響が少ないことがわかります。ただ、著作権や人間による創作についての議論はオープンに行うべきだと思います。
+                </div>
+            </div>
+
+            <!-- カード2: なぜAIを使うのか -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-question-circle"></i>なぜAIを使うのか？</h2>
+                <i class="fa-solid fa-rocket icon-large"></i>
+                <p class="text-content">
+                    単純に言えば、AIは<span class="keyword">生産性を大幅に向上<i class="fa-solid fa-arrow-trend-up"></i></span>させてくれる。最近、Aaron Francisのツイートで「AIのおかげで1日で1週間分の仕事ができるようになった」と読んだ。筆者もそこまでではないが、コンテンツ作成とプログラミングの両方で不可欠なツールになっている。
+                </p>
+                <div class="highlight-box">
+                    多くの人は最初のChatGPTをしか試していないため、急速に進化するAIの現状を正確に把握できていない。AIを一度も使ったことがない人の方が、2年前に使って戻ってこなかった人よりも公平に判断できるかもしれない。
+                </div>
+            </div>
+
+            <!-- カード3: AIの特性 -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-lightbulb"></i>AIの特性と使い方</h2>
+                <i class="fa-solid fa-robot icon-large"></i>
+                <p class="text-content">
+                    「LLMは幻覚を見るから信頼できない」という懸念があるが、筆者は人間のアドバイスを求める時と同じように対処している。人間も間違えることがあり、選択的に<span class="keyword">クロスチェック<i class="fa-solid fa-check-double"></i></span>する習慣がある。
+                </p>
+                <div class="speech-bubble">
+                    AIを「非常に優秀なインターン」のように扱っています。モデルは月々改良されていきますが、最終的な責任は私にあります。AIのせいにはせず、自分でチェックする必要があります。
+                </div>
+                <p class="text-content">
+                    AIツールは比較的オープン。ローカルで実行したり、スクリプトと統合したりできる。例えば、コマンドラインから<span class="keyword">文法チェック<i class="fa-solid fa-spell-check"></i></span>するシンプルなスクリプトを作成できる。
+                </p>
+            </div>
+
+            <!-- カード4: AIとの文章作成 -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-pen-fancy"></i>AIと一緒に書く</h2>
+                <i class="fa-solid fa-feather-pointed icon-large"></i>
+                <p class="text-content">
+                    筆者は記事をAIに書かせることはない。非ネイティブスピーカーとして、言語的な癖は筆者の一部だからだ。しかし、執筆の<span class="keyword">サポートツール<i class="fa-solid fa-hands-helping"></i></span>としてAIに依存している。
+                </p>
+                <ul class="emoji-list">
+                    <li>
+                        <span>📝</span> <strong>文法チェック：</strong>AIの提案と自分のテキストを比較して好きな変更を選ぶ
+                    </li>
+                    <li>
+                        <span>🔄</span> <strong>文章構成の見直し：</strong>冗長な部分を特定するのに役立つ
+                    </li>
+                    <li>
+                        <span>📋</span> <strong>ノート作成と要点抽出：</strong>「学生」として記事を読ませて要点をまとめさせる
+                    </li>
+                    <li>
+                        <span>🔍</span> <strong>批評してもらう：</strong>RedditやTwitterでのコメントのようにAIに記事を「批判」させる
+                    </li>
+                    <li>
+                        <span>🔤</span> <strong>専門用語の特定：</strong>説明なしに使用した技術用語を指摘してもらう
+                    </li>
+                </ul>
+            </div>
+
+            <!-- カード5: AIとのプログラミング -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-code"></i>AIとのプログラミング</h2>
+                <i class="fa-solid fa-laptop-code icon-large"></i>
+                <p class="text-content">
+                    筆者のAI利用の大部分を占めるのがプログラミングで、主に3つのカテゴリーに分けられる：
+                </p>
+                <div class="comparison-container">
+                    <div class="comparison-item">
+                        <i class="fa-solid fa-bug fa-2x" style="color: #A61B40;"></i>
+                        <p><strong>デバッグと要約</strong></p>
+                        <p>エラーやスタックトレースをAIに投げて問題の所在を特定</p>
+                    </div>
+                    <div class="comparison-item">
+                        <i class="fa-solid fa-magnifying-glass-chart fa-2x" style="color: #A61B40;"></i>
+                        <p><strong>ファジーパース</strong></p>
+                        <p>出力があるが入力がない場合、AIが構造を「解析」して入力を作成</p>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <p><i class="fa-solid fa-keyboard fa-lg" style="color: #A61B40;"></i> <strong>コード生成：</strong> シンプルなスニペットから複雑なものまで、特にプロトタイピングに最適</p>
+                </div>
+                <p class="text-content">
+                    言語によってパフォーマンスは異なり、<span class="keyword">Python<i class="fa-brands fa-python"></i></span>では優れているが、JavaScriptはまあまあ、Rustはひどい。アルゴリズムの問題を解く場合、Pythonで反復してから、Rustに翻訳するよう依頼することが多い。
+                </p>
+            </div>
+
+            <!-- カード6: 会話パートナーとしてのAI -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-comments"></i>会話パートナーとしてのAI</h2>
+                <i class="fa-solid fa-headset icon-large"></i>
+                <p class="text-content">
+                    ペアプログラミングは素晴らしいが、一人で作業する時はいつも可能ではない。LLMは<span class="keyword">代わりの対話相手<i class="fa-solid fa-user-friends"></i></span>として機能する。特に専門用語を教えてくれる点で優れている。
+                </p>
+                <div class="speech-bubble">
+                    <p><strong>私:</strong> strcat って先頭からコピーするけど、同じバッファに連結し続けると非効率だよね。ループでやったときのBig-Oってどうなる？それを表す面白い名前あったよね？</p>
+                    <p><strong>AI:</strong> 「Schlemiel the Painter's algorithm（シュレミールの画家のアルゴリズム）」のことですね。strcat のような操作で毎回先頭からコピーする非効率さを表す言い方です。ループ内で繰り返すとO(n^2)の複雑性になります。</p>
+                </div>
+                <p class="text-content">
+                    子どもたちの教育にも役立つ。多くの質問を年齢に合わせて説明し、さらに<span class="keyword">簡略化や詳細化<span>🔄</span></span>を即座に依頼できる。AIが間違える可能性があるが、それも子どもたちに<span class="keyword">批判的思考<i class="fa-solid fa-brain"></i></span>を伝える機会になる。
+                </p>
+            </div>
+
+            <!-- カード7: 多言語サポート -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-language"></i>多言語サポート</h2>
+                <i class="fa-solid fa-globe icon-large"></i>
+                <p class="text-content">
+                    ChatGPTは<span class="keyword">複数の言語<i class="fa-solid fa-language"></i></span>で作業する際に非常に役立つ。例えば、子どもたちのギリシャ人の友達の言葉の違いを理解しようとした時、筆者は発音さえ書けなかったが、ChatGPTは「pa-me-spee-tee」が何を意味するのか理解できた。
+                </p>
+                <div class="highlight-box">
+                    移動中の使用も便利。キーボードで入力できない状況でも、ChatGPTに話しかけると、「えーと」などを省いて文字起こしでき、後でコピーして編集できる。
+                </div>
+                <p class="text-content">
+                    筆者の家族は<span class="keyword">多言語<span>🌍</span></span>であり、ドイツ語、ロシア語、英語をスムーズに切り替えられる点が特に役立っている。
+                </p>
+            </div>
+
+            <!-- カード8: AIスロップについて -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-exclamation-triangle"></i>AIスロップ（低品質出力）の問題</h2>
+                <i class="fa-solid fa-trash-alt icon-large"></i>
+                <p class="text-content">
+                    筆者はLLMに文章を書かせず、AIでイラストも作らない。AIが生成したイラストには特有の<span class="keyword">「AIスロップ」<i class="fa-solid fa-thumbs-down"></i></span>と呼ばれる低品質スタイルがあり、非常に不快に感じる。
+                </p>
+                <div class="speech-bubble">
+                    AIが生成したことを開示せずにプルリクエスト、メール、テキストメッセージを送ってくる人に対しては、すぐに悪い印象を持ってしまいます。
+                </div>
+                <p class="text-content">
+                    しかし、スロップや幻覚は頭を使えば問題にならない。最悪のスロップでも<span class="keyword">良いコンテンツの基礎<i class="fa-solid fa-seedling"></i></span>になり得る。筆者は絵が下手だが、AIスロップ画像を使って欲しいポーズの人物をトレースしたり、AIに物語を想像させて発想の源にしたりすることはできる。
+                </p>
+            </div>
+
+            <!-- カード9: 最終的な考え -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-book"></i>最終的な考え</h2>
+                <i class="fa-solid fa-lightbulb icon-large"></i>
+                <p class="text-content">
+                    AIツールは、<span class="keyword">好奇心旺盛な協力者<i class="fa-solid fa-handshake"></i></span>として見れば、破壊的な魔法ではなく創造的プロセスの自然な拡張に感じる。筆者のアプローチは思考をアウトソーシングするのではなく、<span class="keyword">拡張する<i class="fa-solid fa-expand-arrows-alt"></i></span>こと。
+                </p>
+                <div class="highlight-box">
+                    LLMを使って単純作業を加速し、思考の混乱を解きほぐし、アイデアを素早くプロトタイプ化する。健全な懐疑主義は大切だが、AIを全面的に否定すると、クリティカルに関わる人々にとって、<span class="keyword">可能性の乗数<span>✖️</span></span>としての潜在力を見逃すリスクがある。
+                </div>
+            </div>
+
+            <!-- カード10: 参考情報 -->
+            <div class="card">
+                <h2 class="section-title"><i class="fa-solid fa-info-circle"></i>参考情報</h2>
+                <i class="fa-solid fa-hashtag icon-large"></i>
+                <p class="text-content">
+                    このエントリーは<span class="keyword">ai<i class="fa-solid fa-robot"></i></span>と<span class="keyword">thoughts<i class="fa-solid fa-brain"></i></span>のタグが付けられています。
+                </p>
+                <div class="highlight-box">
+                    <p><strong>筆者の視点：</strong> AIの活用とテクノロジーに関する考察</p>
+                    <p><strong>記事の出所：</strong> lucumr.pocoo.org</p>
+                    <p><strong>公開日：</strong> 2025年1月30日</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>グラフィックレコーディング作成日: 2025年3月11日</p>
+            <p>情報源: lucumr.pocoo.org/2025/1/30/how-i-ai/ (記事著者: Armin Ronacher)</p>
+        </footer>
+    </div>
+</body>
+</html>
